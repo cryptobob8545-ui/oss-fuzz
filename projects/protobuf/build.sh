@@ -15,6 +15,7 @@ cmake -S . -B "$BUILD_DIR" \
   -DCMAKE_CXX_COMPILER="$CXX" \
   -DCMAKE_C_FLAGS="$CFLAGS" \
   -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+  -Dprotobuf_ABSL_PROVIDER=module \
   -Dprotobuf_BUILD_TESTS=OFF \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
@@ -36,4 +37,3 @@ $CXX $CXXFLAGS -std=c++17 \
   -lpthread -lz \
   $LIB_FUZZING_ENGINE \
   -o "$OUT/protobuf_message_fuzzer"
-
