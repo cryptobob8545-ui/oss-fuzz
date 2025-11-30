@@ -27,13 +27,29 @@ if [[ -z "$LIBPROTOBUF" ]]; then
   echo "libprotobuf.a not found in build tree"
   exit 1
 fi
+# utf8_range library used by protobuf UTF-8 validation.
+LIBUTF8=$(find "$BUILD_DIR" -name 'libutf8_range.a' | head -n 1 || true)
+if [[ -z "$LIBUTF8" ]]; then
+  echo "libutf8_range.a not found in build tree"
+  exit 1
+fi
+
+# Collect absl static libs to satisfy protobuf's absl dependencies.
+ABSL_LIBS=$(find "$BUILD_DIR/_deps/absl-build" -name 'libabsl_*.a' | tr '\n' ' ')
 
 # Build the fuzzer.
 cd "$SRC"
 $CXX $CXXFLAGS -std=c++17 \
   -I"$PROJECT_SRC/src" \
+  -I"$BUILD_DIR/_deps/absl-src" \
+  -I"$BUILD_DIR/_deps/absl-build" \
+  -I"$PROJECT_SRC/third_party/utf8_range" \
   protobuf_message_fuzzer.cc \
+  -Wl,--start-group \
   "$LIBPROTOBUF" \
+  $ABSL_LIBS \
+  "$LIBUTF8" \
+  -Wl,--end-group \
   -lpthread -lz \
   $LIB_FUZZING_ENGINE \
   -o "$OUT/protobuf_message_fuzzer"
